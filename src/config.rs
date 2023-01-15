@@ -34,19 +34,17 @@ pub enum Perm {
     AllowNoPass,
 }
 
-
 /// Returns a Perm variant based on the config item corresponding the *user*
 /// in *config* for *cmd*
 pub fn get_perm(config: &HashMap<&'static str, ConfigItem>, user: &str, cmd: &str) -> Perm {
     let cfg = match config.get(user) {
-        None => {return Perm::Disallow},
-        Some(x) => {x}
+        None => return Perm::Disallow,
+        Some(x) => x,
     };
-    fn allow(cfg: Option<&'static [&'static str]>,cmd: &str) -> bool {
+    fn allow(cfg: Option<&'static [&'static str]>, cmd: &str) -> bool {
         match cfg {
             Some(x) => x.contains(&cmd),
             None => true,
-
         }
     }
     if allow(cfg.no_pass, cmd) {
