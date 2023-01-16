@@ -43,3 +43,7 @@ pub fn check_password(username: &str, passwd: &str) -> Option<bool> {
             == CStr::from_ptr(crypt(CString::new(passwd).ok()?.as_ptr(), pass.sp_pwdp))
     })
 }
+
+pub fn is_root() -> bool {
+    unsafe {libc::geteuid() == 0}
+}

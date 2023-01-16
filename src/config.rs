@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 pub struct ConfigItem {
     /// An array of paths to binaries that the user can execute without entering
     /// a password, if None, all commands will be no_pass.

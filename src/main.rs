@@ -1,6 +1,8 @@
 mod config;
 use std::{process::exit, thread::panicking};
 
+use libc::geteuid;
+
 fn main() {
     let username = runas::get_username().unwrap_or_else(|| {
         eprintln!("Failed to get username");
@@ -29,6 +31,10 @@ fn main() {
         eprintln!("{}: command not found", args[1]);
         exit(1);
     }).display().to_string();
+    if !runas::is_root() {
+        eprintln!("runas needs setuid to work");
+        exit(1);
+    }
     match cfg.get_perm(&cmdp) {
         config::Perm::Disallow => {
             eprintln!("{} is not allowd to execute {}", username, cmdp)
