@@ -2,11 +2,11 @@ use std::{ffi::{CStr, CString}, env};
 
 extern "C" {
      fn readpassphrase(prompt: *const i8, buf: *mut i8, bufsize: usize, flags: i32)-> *mut i8;
+     fn crypt(phrase: *const i8, setting: *const i8) -> *mut i8;
 }
 
 pub fn get_username() -> Option<String> {
-    let name = unsafe { CStr::from_ptr(libc::getpwuid(libc::getuid()).as_ref()?.pw_name) };
-    name.to_str().ok().map(|x| x.to_string())
+    unsafe { CStr::from_ptr(libc::getlogin()) }.to_str().ok().map(|x| x.to_string())
 }
 
 pub fn find_bin(exec: &str) -> Option<String> {
@@ -28,4 +28,9 @@ pub fn read_password(prompt: &str) -> Option<String> {
         libc::free(buf.cast());
         ret
     }
+}
+
+pub fn check_password(username: &str, passwd: &str) -> Option<bool> {
+    let pass = unsafe {libc::getspnam(CString::new(username).ok()?.as_ptr()).as_ref()?};
+    Some(unsafe {CStr::from_ptr(pass.sp_pwdp) == CStr::from_ptr(crypt(CString::new(passwd).ok()?.as_ptr(), pass.sp_pwdp))})
 }
