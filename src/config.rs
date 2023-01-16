@@ -12,14 +12,18 @@ pub struct ConfigItem {
 /// Creates the configuration. It should return a hashmap between the username and
 /// the user's configuration item.
 #[inline]
-pub fn create_config() -> HashMap<&'static str, ConfigItem> {
-    HashMap::from([(
-        "rhl120",
-        ConfigItem {
+pub fn get_config(name: &str) -> Option<ConfigItem> {
+    match name {
+        "rhl120" => Some(ConfigItem {
             no_pass: Some(&["/bin/poweroff"]),
             pass: None,
-        },
-    )])
+        }),
+        "root" => Some(ConfigItem {
+            no_pass: None,
+            pass: None,
+        }),
+        _ => None,
+    }
 }
 
 // cut here for user config
@@ -36,11 +40,7 @@ pub enum Perm {
 
 /// Returns a Perm variant based on the config item corresponding the *user*
 /// in *config* for *cmd*
-pub fn get_perm(config: &HashMap<&'static str, ConfigItem>, user: &str, cmd: &str) -> Perm {
-    let cfg = match config.get(user) {
-        None => return Perm::Disallow,
-        Some(x) => x,
-    };
+pub fn get_perm(cfg: ConfigItem, cmd: &str) -> Perm {
     fn allow(cfg: Option<&'static [&'static str]>, cmd: &str) -> bool {
         match cfg {
             Some(x) => x.contains(&cmd),
