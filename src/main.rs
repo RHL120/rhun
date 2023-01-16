@@ -1,11 +1,13 @@
 mod config;
+use std::process::exit;
 
-#[derive(Debug)]
-enum Error {
-
-}
-
-fn main() -> Result<(), Error>{
-    let username = runas::get_username();
-    Ok(())
+fn main() {
+    let username = runas::get_username().unwrap_or_else(|| {
+        eprintln!("Failed to get username");
+        exit(1);
+    });
+    let cfg = config::get_config(&username).unwrap_or_else(|| {
+        eprintln!("runas is not configured for {}.", username);
+        exit(1);
+    });
 }

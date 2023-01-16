@@ -40,18 +40,20 @@ pub enum Perm {
 
 /// Returns a Perm variant based on the config item corresponding the *user*
 /// in *config* for *cmd*
-pub fn get_perm(cfg: ConfigItem, cmd: &str) -> Perm {
-    fn allow(cfg: Option<&'static [&'static str]>, cmd: &str) -> bool {
-        match cfg {
-            Some(x) => x.contains(&cmd),
-            None => true,
+impl ConfigItem {
+    pub fn get_perm(&self, cmd: &str) -> Perm {
+        fn allow(cfg: Option<&'static [&'static str]>, cmd: &str) -> bool {
+            match cfg {
+                Some(x) => x.contains(&cmd),
+                None => true,
+            }
         }
-    }
-    if allow(cfg.no_pass, cmd) {
-        Perm::AllowNoPass
-    } else if allow(cfg.pass, cmd) {
-        Perm::AllowPass
-    } else {
-        Perm::Disallow
+        if allow(self.no_pass, cmd) {
+            Perm::AllowNoPass
+        } else if allow(self.pass, cmd) {
+            Perm::AllowPass
+        } else {
+            Perm::Disallow
+        }
     }
 }
