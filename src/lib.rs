@@ -20,13 +20,7 @@ pub fn find_bin(exec: &str) -> Option<String> {
     env::split_paths(&path).find_map(|x| {
         let path = x.join(exec);
         match path.is_file() {
-            true => Some(
-                std::fs::canonicalize(path)
-                    .ok()?
-                    .into_os_string()
-                    .into_string()
-                    .ok()?,
-            ),
+            true => Some(path.display().to_string()),
             false => None,
         }
     })
