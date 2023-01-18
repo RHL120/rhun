@@ -80,11 +80,12 @@ fn main() {
                     exit(1);
                 }
             }
-            runas::update_pass_time(&username).
-                or_else(|| Some(eprintln!("Failed to update last password time")));
+            runas::update_pass_time(&username)
+                .or_else(|| Some(eprintln!("Failed to update last password time")));
         }
         _ => {}
     };
+    unsafe { libc::setuid(0) };
     let _ = std::process::Command::new(cmdp)
         .args(&args[2..])
         .spawn()
