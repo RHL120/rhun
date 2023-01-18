@@ -1,6 +1,9 @@
 use std::{
     env,
     ffi::{CStr, CString},
+    fs::File,
+    mem::MaybeUninit,
+    os::unix::prelude::AsRawFd,
 };
 
 extern "C" {
@@ -36,6 +39,30 @@ pub fn read_password(prompt: &str) -> Option<String> {
     }
 }
 
+pub fn update_pass_time(username: &str) -> Option<()> {
+    std::fs::File::create(format!("/tmp/runas_timestamp_{}", username))
+        .ok()
+        .map(|_| ())
+}
+
+pub fn check_pass_time(username: &str) -> Option<bool> {
+    let file = match std::fs::File::open(format!("/tmp/runas_timestamp_{}", username)) {
+        Ok(x) => x,
+        Err(x) => {
+            return if x.kind() == std::io::ErrorKind::NotFound {
+                Some(false)
+            } else {
+                None
+            }
+        }
+    };
+    let md = file.metadata().ok()?;
+    Some(
+        owner_is_root(&file)?
+            && md.modified().ok()?.elapsed().ok()? < std::time::Duration::from_secs(300),
+    )
+}
+
 pub fn check_password(username: &str, passwd: &str) -> Option<bool> {
     let pass = unsafe { libc::getspnam(CString::new(username).ok()?.as_ptr()).as_ref()? };
     Some(unsafe {
@@ -45,5 +72,18 @@ pub fn check_password(username: &str, passwd: &str) -> Option<bool> {
 }
 
 pub fn is_root() -> bool {
-    unsafe {libc::geteuid() == 0}
+    unsafe { libc::geteuid() == 0 }
+}
+
+fn owner_is_root(f: &File) -> Option<bool> {
+    let fd = f.as_raw_fd();
+    unsafe {
+        let mut stat: MaybeUninit<libc::stat> = std::mem::MaybeUninit::uninit();
+        if libc::fstat(fd, stat.as_mut_ptr()) != 0 {
+            None
+        } else {
+            let stat = stat.assume_init_ref();
+            Some(stat.st_uid == 0 && stat.st_gid == 0)
+        }
+    }
 }
