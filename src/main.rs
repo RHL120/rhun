@@ -89,6 +89,9 @@ fn main() {
     let _ = std::process::Command::new(cmdp)
         .args(&args[2..])
         .spawn()
-        .unwrap()
+        .unwrap_or_else(|_| {
+            eprintln!("Failed to execute command");
+            exit(1)
+        })
         .wait();
 }
