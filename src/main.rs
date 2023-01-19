@@ -85,12 +85,21 @@ fn main() {
         _ => {}
     };
     unsafe { libc::setuid(0) };
-    let _ = std::process::Command::new(cmdp)
+    let ret = std::process::Command::new(cmdp)
         .args(&args[2..])
         .spawn()
         .unwrap_or_else(|_| {
             eprintln!("Failed to execute command");
             exit(1)
         })
-        .wait();
+        .wait()
+        .unwrap_or_else(|_| {
+            eprintln!("Failed to wait for command");
+            exit(1)
+        })
+        .code();
+    exit(ret.unwrap_or_else(|| {
+            eprintln!("Failed to get command return value");
+            exit(1)
+    }));
 }
