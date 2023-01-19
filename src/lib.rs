@@ -11,6 +11,7 @@ extern "C" {
     fn crypt(phrase: *const i8, setting: *const i8) -> *mut i8;
 }
 
+/// Get's the current user's name
 pub fn get_username() -> Option<String> {
     unsafe { CStr::from_ptr(libc::getlogin()) }
         .to_str()
@@ -18,6 +19,7 @@ pub fn get_username() -> Option<String> {
         .map(|x| x.to_string())
 }
 
+/// Given the command *exec*, it returns the absolute path for that command
 pub fn find_bin(exec: &str) -> Option<String> {
     let path = env::var_os("PATH")?;
     env::split_paths(&path).find_map(|x| {
@@ -29,6 +31,7 @@ pub fn find_bin(exec: &str) -> Option<String> {
     })
 }
 
+/// Reads a password from the user (with no echo)
 pub fn read_password(prompt: &str) -> Option<String> {
     unsafe {
         let buf: *mut i8 = libc::malloc(72).cast();
@@ -39,12 +42,15 @@ pub fn read_password(prompt: &str) -> Option<String> {
     }
 }
 
+/// Updates the last correct password timestamp
 pub fn update_pass_time(username: &str) -> Option<()> {
     std::fs::File::create(format!("/tmp/runas_timestamp_{}", username))
         .ok()
         .map(|_| ())
 }
 
+/// Returns true if the last time the user entered a correct password was less
+/// than 5 minutes ago. Returns false otherwise.
 pub fn check_pass_time(username: &str) -> Option<bool> {
     let file = match std::fs::File::open(format!("/tmp/runas_timestamp_{}", username)) {
         Ok(x) => x,
@@ -63,6 +69,7 @@ pub fn check_pass_time(username: &str) -> Option<bool> {
     )
 }
 
+/// Check if *passwd* is the password for the user *username*
 pub fn check_password(username: &str, passwd: &str) -> Option<bool> {
     let pass = unsafe { libc::getspnam(CString::new(username).ok()?.as_ptr()).as_ref()? };
     Some(unsafe {
@@ -71,10 +78,12 @@ pub fn check_password(username: &str, passwd: &str) -> Option<bool> {
     })
 }
 
+/// Returns true if the effictive uid is 0
 pub fn is_root() -> bool {
     unsafe { libc::geteuid() == 0 }
 }
 
+/// Returns true if *f*'s owner's uid and gid is root
 fn owner_is_root(f: &File) -> Option<bool> {
     let fd = f.as_raw_fd();
     unsafe {

@@ -8,8 +8,8 @@ pub struct ConfigItem {
     pass: Option<&'static [&'static str]>,
 }
 
-/// Creates the configuration. It should return a hashmap between the username and
-/// the user's configuration item.
+/// Creates the configuration. Given a username it should return the user's
+/// configuration item.
 #[inline]
 pub fn get_config(name: &str) -> Option<ConfigItem> {
     match name {
