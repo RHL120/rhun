@@ -2,7 +2,12 @@
 name = "runas"
 version = "0.1.0"
 edition = "2021"
-
+license="GPL-3.0-or-later"
+authors = ["RHL120 <rhl120@protonmail.com>"]
+description = "A simple alternative to sudo / doas"
+repository = "https://github.com/RHL120/runas"
+keywords = ["cli", "sudo", "root", "linux", "gnu"]
+categories = ["command-line-interface", "command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [profile.release]
 strip = true
