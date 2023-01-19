@@ -2,12 +2,12 @@ mod config;
 use std::process::exit;
 
 fn main() {
-    let username = runas::get_username().unwrap_or_else(|| {
+    let username = rhun::get_username().unwrap_or_else(|| {
         eprintln!("Failed to get username");
         exit(1);
     });
     let cfg = config::get_config(&username).unwrap_or_else(|| {
-        eprintln!("runas is not configured for {}.", username);
+        eprintln!("rhun is not configured for {}.", username);
         exit(1);
     });
     let args: Vec<String> = std::env::args().collect();
@@ -23,7 +23,7 @@ fn main() {
         {
             args[1].clone()
         } else {
-            runas::find_bin(&args[1])
+            rhun::find_bin(&args[1])
                 .unwrap_or_else(|| {
                     eprintln!("{}: command not found", args[1]);
                     exit(1)
@@ -38,8 +38,8 @@ fn main() {
         })
         .display()
         .to_string();
-    if !runas::is_root() {
-        eprintln!("runas needs setuid to work");
+    if !rhun::is_root() {
+        eprintln!("rhun needs setuid to work");
         exit(1);
     }
     match cfg.get_perm(&cmdp) {
@@ -49,14 +49,14 @@ fn main() {
         config::Perm::AllowPass => {
             let mut correct = false;
             let max_attempts = 4;
-            let nopass = runas::check_pass_time(&username).unwrap_or_else(|| {
+            let nopass = rhun::check_pass_time(&username).unwrap_or_else(|| {
                 eprintln!("Failed to check last password time, asking for password");
                 false
             });
             if !nopass {
                 for i in 0..max_attempts {
-                    let pass = runas::read_password(&format!(
-                        "[runas] password for {}, attempt {} / {}",
+                    let pass = rhun::read_password(&format!(
+                        "[rhun] password for {}, attempt {} / {}",
                         username,
                         i + 1,
                         max_attempts
@@ -65,7 +65,7 @@ fn main() {
                         eprintln!("Failed to read password");
                         exit(1);
                     });
-                    if runas::check_password(&username, &pass).unwrap_or_else(|| {
+                    if rhun::check_password(&username, &pass).unwrap_or_else(|| {
                         eprintln!("Failed to verify password");
                         exit(1);
                     }) {
@@ -80,7 +80,7 @@ fn main() {
                     exit(1);
                 }
             }
-            runas::update_pass_time(&username)
+            rhun::update_pass_time(&username)
                 .or_else(|| Some(eprintln!("Failed to update last password time")));
         }
         _ => {}

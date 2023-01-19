@@ -44,7 +44,7 @@ pub fn read_password(prompt: &str) -> Option<String> {
 
 /// Updates the last correct password timestamp
 pub fn update_pass_time(username: &str) -> Option<()> {
-    std::fs::File::create(format!("/tmp/runas_timestamp_{}", username))
+    std::fs::File::create(format!("/tmp/rhun_timestamp_{}", username))
         .ok()
         .map(|_| ())
 }
@@ -52,7 +52,7 @@ pub fn update_pass_time(username: &str) -> Option<()> {
 /// Returns true if the last time the user entered a correct password was less
 /// than 5 minutes ago. Returns false otherwise.
 pub fn check_pass_time(username: &str) -> Option<bool> {
-    let file = match std::fs::File::open(format!("/tmp/runas_timestamp_{}", username)) {
+    let file = match std::fs::File::open(format!("/tmp/rhun_timestamp_{}", username)) {
         Ok(x) => x,
         Err(x) => {
             return if x.kind() == std::io::ErrorKind::NotFound {

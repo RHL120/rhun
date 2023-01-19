@@ -1,6 +1,6 @@
 all:
 	cargo build --release
 install: all
-	sudo cp ./target/release/runas /usr/sbin/ 
-	sudo chown root:root /usr/sbin/runas 
-	sudo chmod a+s /usr/sbin/runas
+	sudo cp ./target/release/rhun /usr/sbin/ 
+	sudo chown root:root /usr/sbin/rhun 
+	sudo chmod a+s /usr/sbin/rhun
