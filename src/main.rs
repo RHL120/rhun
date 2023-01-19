@@ -18,17 +18,15 @@ fn main() {
     let cmdp = std::fs::canonicalize(
         if args[1].starts_with("./")
             || args[1].starts_with("../")
-            || args[1].starts_with("/")
-            || args[1].starts_with("~")
+            || args[1].starts_with('/')
+            || args[1].starts_with('~')
         {
             args[1].clone()
         } else {
-            rhun::find_bin(&args[1])
-                .unwrap_or_else(|| {
-                    eprintln!("{}: command not found", args[1]);
-                    exit(1)
-                })
-                .clone()
+            rhun::find_bin(&args[1]).unwrap_or_else(|| {
+                eprintln!("{}: command not found", args[1]);
+                exit(1)
+            })
         },
     );
     let cmdp = cmdp
@@ -65,10 +63,11 @@ fn main() {
                         eprintln!("Failed to read password");
                         exit(1);
                     });
-                    if rhun::check_password(&username, &pass).unwrap_or_else(|| {
+                    let passed = rhun::check_password(&username, &pass).unwrap_or_else(|| {
                         eprintln!("Failed to verify password");
                         exit(1);
-                    }) {
+                    });
+                    if passed {
                         correct = true;
                         break;
                     } else {
